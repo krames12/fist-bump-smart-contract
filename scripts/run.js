@@ -1,33 +1,34 @@
 const fistBumpers = {};
 
 const main = async() => {
-  const [owner, randomPerson] = await hre.ethers.getSigners();
   const fistBumpContractFactory = await hre.ethers.getContractFactory('FistBumpPortal');
-  const fistBumpContract = await fistBumpContractFactory.deploy();
+  const fistBumpContract = await fistBumpContractFactory.deploy({
+    value: hre.ethers.utils.parseEther('0.1')
+  });
   await fistBumpContract.deployed();
   
   console.log("Contract deployed to:", fistBumpContract.address);
-  console.log("Contract deployed by:", owner.address);
+
+  // Get Contract balance
+  let contractBalance = await hre.ethers.provider.getBalance(fistBumpContract.address);
+  console.log("Contract Balance:", hre.ethers.utils.formatEther(contractBalance));
   
   let fistBumpCount;
   fistBumpCount = await fistBumpContract.getTotalFistBumps();
+  console.log(fistBumpCount.toNumber());
   
-  let fistBumpTxn = await fistBumpContract.fistBump();
+  let fistBumpTxn = await fistBumpContract.fistBump("Totally a test message");
   await fistBumpTxn.wait();
-  fistBumpers[owner.address] = fistBumpers[owner.address]++ || 1
 
-  fistBumpCount = await fistBumpContract.getTotalFistBumps();
-
-  fistBumpTxn = await fistBumpContract.connect(randomPerson).fistBump();
+  const [_, randomPerson] = await hre.ethers.getSigners();
+  fistBumpTxn = await fistBumpContract.connect(randomPerson).fistBump("A random message");
   await fistBumpTxn.wait();
-  fistBumpers[randomPerson.address] = fistBumpers[randomPerson.address] + 1 || 1
 
-  fistBumpTxn = await fistBumpContract.connect(randomPerson).fistBump();
-  await fistBumpTxn.wait();
-  fistBumpers[randomPerson.address] = fistBumpers[randomPerson.address] + 1 || 1
+  contractBalance = await hre.ethers.provider.getBalance(fistBumpContract.address);
+  console.log("Contract Balance:", hre.ethers.utils.formatEther(contractBalance));
 
-  fistBumpCount = await fistBumpContract.getTotalFistBumps();
-  console.log("All current fist bumpers", fistBumpers)
+  fistBumpCount = await fistBumpContract.getAllFistBumps();
+  console.log("All current fist bumpers", fistBumpCount)
 };
 
 
