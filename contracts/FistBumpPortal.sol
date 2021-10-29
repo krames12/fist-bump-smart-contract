@@ -18,6 +18,8 @@ contract FistBumpPortal {
 
   FistBump[] fistBumps;
 
+  mapping(address => uint256) public lastWavedAt;
+
   constructor() payable {
     console.log("I'm some sort of smart contract, at least in name");
 
@@ -25,11 +27,21 @@ contract FistBumpPortal {
   }
 
   function fistBump(string memory _message) public {
+    // Cooldown period to prevent spamming
+    require(
+      lastWavedAt[msg.sender] + 15 minutes < block.timestamp,
+      "Wait 15m"
+    );
+
+    lastWavedAt[msg.sender] = block.timestamp;
+    
     totalFistBumps += 1;
     console.log("%s has fist bumped you!", msg.sender);
 
     fistBumps.push(FistBump(msg.sender, _message, block.timestamp));
 
+
+    // Fist Bumping has a chance to reward a small amount of eth
     seed = (block.timestamp + block.difficulty) % 100;
 
     if(seed <= 34) {

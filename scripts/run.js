@@ -24,6 +24,9 @@ const main = async() => {
   fistBumpTxn = await fistBumpContract.connect(randomPerson).fistBump("A random message");
   await fistBumpTxn.wait();
 
+  fistBumpTxn = await fistBumpContract.fistBump("Totally a test message");
+  await fistBumpTxn.wait();
+
   contractBalance = await hre.ethers.provider.getBalance(fistBumpContract.address);
   console.log("Contract Balance:", hre.ethers.utils.formatEther(contractBalance));
 
